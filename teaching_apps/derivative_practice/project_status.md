@@ -351,6 +351,15 @@ branch build off, so nothing overwrites the deployment.
 **Live at <https://josephmacula.github.io/math_and_AI_seminar/>.** The app is
 the site: `index.html` at the root, `vendor/katex/` beside it.
 
+**A redeploy does not reach a browser that has been there before**, which is
+worth knowing before concluding a deploy has failed. Pages serves HTML with
+`cache-control: max-age=600`, so anyone who loaded the URL while it was still
+serving the old Jekyll homepage kept that page for up to ten minutes after the
+fix was live — while `curl` showed the new one immediately. Adding a query
+string (`?v=2`) makes a different cache key and settles the question at once,
+and a hard reload does the same. It only affects people who visited earlier;
+a first-time visitor is never served the stale copy.
+
 ---
 
 ## Derivative practice
