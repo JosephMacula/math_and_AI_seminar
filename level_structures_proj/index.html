@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ray Class Field Lattice</title>
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="styles.css">
+<script src="vendor/katex/katex.min.js"></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="eyebrow">Imaginary quadratic fields</p>
+  <h1>Ray class field lattice</h1>
+  <p class="lede">
+    Fields between the Hilbert class field <span data-tex="H_K"></span> and the
+    ray class field <span data-tex="K_{(m)}"></span>, each labelled by its
+    intersection with <span data-tex="\mathbb{Q}(\zeta_m)"></span>.
+  </p>
+</header>
+
+<section class="card controls">
+  <form id="input-form">
+    <label>Fundamental discriminant <span data-tex="D_K"></span>
+      <input id="discriminant" inputmode="numeric" value="-4" required>
+    </label>
+    <label>Modulus integer <span data-tex="m"></span>
+      <input id="modulus" inputmode="numeric" value="7" required>
+    </label>
+    <button id="submit">Compute lattice</button>
+  </form>
+  <div class="examples">Try:
+    <button data-d="-4" data-m="7">-4, 7</button>
+    <button data-d="-11" data-m="5">-11, 5</button>
+    <button data-d="-7" data-m="5">-7, 5</button>
+    <button data-d="-3" data-m="7">-3, 7</button>
+    <button data-d="-20" data-m="3">-20, 3</button>
+  </div>
+  <p id="error" class="error" role="alert" hidden></p>
+</section>
+
+<section id="results" hidden>
+  <div id="summary" class="summary"></div>
+
+  <div class="panels">
+    <section class="card lattice-card">
+      <div class="heading">
+        <div>
+          <p class="eyebrow">Galois correspondence</p>
+          <h2>Fields between <span data-tex="H_K"></span> and
+              <span id="tex-ray" data-tex="K_{(m)}"></span></h2>
+        </div>
+        <p class="legend">
+          vertical <span data-tex="[L : H_K]"></span><br>
+          horizontal <span id="tex-axis" data-tex="[L \cap \mathbb{Q}(\zeta_m) : \mathbb{Q}]"></span>
+        </p>
+      </div>
+      <div id="lattice" class="plot"></div>
+    </section>
+
+    <section class="card companion-card">
+      <div class="heading">
+        <div>
+          <p class="eyebrow">Companion</p>
+          <h2>Subfields of <span id="tex-cyclo" data-tex="\mathbb{Q}(\zeta_m)"></span></h2>
+        </div>
+      </div>
+      <div id="companion" class="plot"></div>
+      <aside id="details" class="details"></aside>
+    </section>
+  </div>
+</section>
+
+</main>
+<footer>
+  <span data-tex="L \cap \mathbb{Q}(\zeta_m)"></span> is the fixed field of
+  <span data-tex="\nu(U)"></span>, where
+  <span data-tex="\nu([\mathfrak{a}]) = N(\mathfrak{a}) \bmod m"></span> and
+  <span data-tex="U = \operatorname{Gal}(K_{(m)}/L)"></span>.
+</footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>

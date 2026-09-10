@@ -1,0 +1,190 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --ink: #1b1b1a;
+  --muted: #6b6b66;
+  --line: #d9d9d4;
+  --accent: #2f6f5e;
+  --accent-soft: #e3efeb;
+  --hilbert: #b4713a;
+  --ray: #3a5fb4;
+  --join: #8b3aa8;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --card: #202225;
+    --ink: #ececeb;
+    --muted: #9b9b96;
+    --line: #34363a;
+    --accent: #6fbfa6;
+    --accent-soft: #24352f;
+    --hilbert: #d99a5f;
+    --ray: #7f9ce0;
+    --join: #c084d8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 1.5rem 3rem;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main { max-width: 1180px; margin: 0 auto; }
+
+.hero { padding: 2.5rem 0 1.5rem; }
+.eyebrow {
+  margin: 0 0 .35rem;
+  font-size: .74rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+h1 { margin: 0 0 .5rem; font-size: 1.9rem; letter-spacing: -.02em; }
+h2 { margin: 0; font-size: 1.05rem; }
+.lede { margin: 0; max-width: 46rem; color: var(--muted); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+}
+
+.controls { display: grid; gap: .85rem; }
+
+form { display: flex; flex-wrap: wrap; gap: .85rem; align-items: end; }
+label { display: grid; gap: .3rem; font-size: .8rem; color: var(--muted); }
+input {
+  width: 11rem;
+  padding: .5rem .6rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+input:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+button {
+  padding: .5rem .9rem;
+  font: inherit;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+button[disabled] { opacity: .55; cursor: default; }
+
+.examples { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.examples button {
+  padding: .22rem .55rem;
+  font-size: .78rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.error { margin: 0; color: #b3261e; font-size: .88rem; }
+@media (prefers-color-scheme: dark) { .error { color: #f2b8b5; } }
+
+.summary { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.1rem 0; }
+.stat {
+  display: grid;
+  gap: .1rem;
+  padding: .55rem .8rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+.stat .label { font-size: .7rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+/* Uppercasing a rendered formula turns phi(m) into Phi(M), so maths opts out. */
+.stat .label .katex { text-transform: none; letter-spacing: normal; }
+.stat .value { font-variant-numeric: tabular-nums; }
+
+.panels { display: grid; grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); gap: .9rem; align-items: start; }
+@media (max-width: 900px) { .panels { grid-template-columns: 1fr; } }
+
+.heading { display: flex; justify-content: space-between; align-items: start; gap: 1rem; margin-bottom: .6rem; }
+.legend { margin: 0; font-size: .76rem; color: var(--muted); text-align: right; line-height: 1.9; }
+
+.plot { overflow: auto; }
+svg { display: block; max-width: 100%; height: auto; }
+
+.edge { stroke: var(--line); stroke-width: 1.4; }
+
+.node circle {
+  fill: var(--card);
+  stroke: var(--accent);
+  stroke-width: 1.6;
+  transition: fill .12s;
+}
+.node { cursor: pointer; }
+
+/* The degree inside a node is a bare integer, so it needs no KaTeX pass; it
+   borrows the KaTeX face so that it matches the rendered captions. */
+.node .degree {
+  text-anchor: middle;
+  font-family: "KaTeX_Main", Times, serif;
+  font-size: 14px;
+  fill: var(--ink);
+}
+
+/* Captions and axis titles are rendered by KaTeX, which emits HTML, so they
+   enter the SVG through a foreignObject. */
+foreignObject { overflow: visible; }
+.tex-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 11px;
+  line-height: 1.15;
+  color: var(--muted);
+}
+.tex-label .katex { white-space: nowrap; }
+
+.node.hilbert circle { stroke: var(--hilbert); stroke-width: 2.4; }
+.node.ray circle { stroke: var(--ray); stroke-width: 2.4; }
+.node.join circle { stroke: var(--join); stroke-width: 2.4; stroke-dasharray: 3 2.5; }
+.node.selected circle { fill: var(--accent-soft); stroke-width: 3; }
+.node.subfield:not(.attained) circle { stroke: var(--line); }
+.node.subfield:not(.attained) .tex-label { opacity: .5; }
+
+.tick {
+  text-anchor: middle;
+  font-family: "KaTeX_Main", Times, serif;
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.details { margin-top: .9rem; border-top: 1px solid var(--line); padding-top: .8rem; }
+.details h3 { margin: 0 0 .5rem; font-size: .95rem; }
+.badge {
+  display: inline-block;
+  margin: 0 0 .6rem;
+  padding: .18rem .5rem;
+  font-size: .72rem;
+  color: var(--join);
+  border: 1px solid var(--join);
+  border-radius: 999px;
+}
+.details dl { display: grid; grid-template-columns: auto 1fr; gap: .45rem .8rem; margin: 0; font-size: .84rem; align-items: baseline; }
+.details dt { color: var(--muted); }
+.details dd { margin: 0; }
+.details dd .katex { font-size: 1.05em; }
+.details dd { overflow-wrap: anywhere; }
+
+footer {
+  max-width: 1180px;
+  margin: 2rem auto 0;
+  font-size: .78rem;
+  color: var(--muted);
+}
