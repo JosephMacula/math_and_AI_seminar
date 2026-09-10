@@ -39,6 +39,9 @@ const state = {
   studentSlope: null,
   revealed: false,
   zoom: 1,
+  /* How far the graph has been dragged, in fractions of the visible window
+     (see panInterval in plot.js). */
+  pan: { x: 0, y: 0 },
   /* Problems are dealt from a shuffled bag rather than walked in order, so a
      student meets the rules mixed together instead of forty power-rule
      problems in a row.  The bag empties before any problem repeats. */
@@ -80,6 +83,10 @@ function formatWindow([low, high]) {
   return `x from ${low.toFixed(places)} to ${high.toFixed(places)}`;
 }
 
+/* The size of the plot in pixels as last drawn, which is what a drag's pixels
+   are divided by to turn them into a pan. */
+let plotSize = null;
+
 function redraw() {
   const current = problem();
   const drawn = drawPlot(canvas, {
@@ -88,6 +95,7 @@ function redraw() {
     fa: current.f(current.a),
     xRange: current.window,
     zoom: state.zoom,
+    pan: state.pan,
     studentSlope: state.studentSlope,
     trueSlope: state.revealed ? current.fp(current.a) : null,
     colors: colors(),
@@ -99,7 +107,10 @@ function redraw() {
   zoomInput.setAttribute("aria-valuetext", `${formatZoom(state.zoom)} magnification`);
   /* drawPlot declines to draw into a canvas with no area yet, and returns
      nothing when it does; leave the last readout standing in that case. */
-  if (drawn) zoomWindow.textContent = formatWindow(drawn.xRange);
+  if (drawn) {
+    zoomWindow.textContent = formatWindow(drawn.xRange);
+    plotSize = { width: drawn.plotWidth, height: drawn.plotHeight };
+  }
 }
 
 const round = value => Number(value.toPrecision(6)).toString();
@@ -115,9 +126,9 @@ function loadProblem() {
   state.studentSlope = null;
   setRevealed(false);
   /* A new problem opens at its own window.  Carrying a 5,000x zoom over to a
-     function the student has not looked at yet would show them a blank slope. */
-  state.zoom = 1;
-  zoomInput.value = "0";
+     function the student has not looked at yet would show them a blank slope,
+     and a pan carried over could leave its point off the screen. */
+  resetView();
 
   $("#statement").innerHTML = tex(current.tex, true);
   $("#point").innerHTML = tex(`a = ${current.aTex}`, true);
@@ -206,11 +217,55 @@ zoomInput.addEventListener("input", () => {
   state.zoom = zoomFor(zoomInput.value);
   redraw();
 });
-$("#zoom-reset").addEventListener("click", () => {
+/* Back to the problem's own window: no magnification, no drag. */
+function resetView() {
   zoomInput.value = "0";
   state.zoom = 1;
+  state.pan = { x: 0, y: 0 };
+}
+$("#zoom-reset").addEventListener("click", () => {
+  resetView();
   redraw();
 });
+
+/* Dragging the graph pans it.  The pan is worked out from where the drag
+   started rather than added up move by move, so the picture ends up exactly
+   under the pointer however many events the drag is split into.  Pointer
+   capture keeps the drag alive when the pointer leaves the canvas mid-drag,
+   and pointer events cover mouse, pen and touch alike. */
+let drag = null;
+
+canvas.addEventListener("pointerdown", event => {
+  /* A second finger landing mid-drag is ignored rather than taking over. */
+  if (drag || event.button !== 0 || !plotSize) return;
+  event.preventDefault();
+  drag = { id: event.pointerId, x: event.clientX, y: event.clientY, pan: state.pan };
+  canvas.setPointerCapture(event.pointerId);
+  canvas.classList.add("dragging");
+});
+
+canvas.addEventListener("pointermove", event => {
+  if (!drag || event.pointerId !== drag.id) return;
+  /* Dragging right carries the picture right, so the window moves left; and
+     dragging down carries it down, so the window moves up.  Screen y grows
+     downwards, which is why the two signs differ. */
+  state.pan = {
+    x: drag.pan.x - (event.clientX - drag.x) / plotSize.width,
+    y: drag.pan.y + (event.clientY - drag.y) / plotSize.height,
+  };
+  redraw();
+});
+
+const endDrag = event => {
+  if (!drag || event.pointerId !== drag.id) return;
+  drag = null;
+  canvas.classList.remove("dragging");
+};
+canvas.addEventListener("pointerup", endDrag);
+canvas.addEventListener("pointercancel", endDrag);
+/* However the drag ends -- including ways that send no pointerup -- the
+   browser releases the capture, so this keeps a drag from ever sticking. */
+canvas.addEventListener("lostpointercapture", endDrag);
 
 function nextProblem() {
   if (!state.bag.length) refillBag(state.index);

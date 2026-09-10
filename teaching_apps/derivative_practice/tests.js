@@ -8,7 +8,7 @@
 
 const { parse } = require("./parse.js");
 const { PROBLEMS } = require("./problems.js");
-const { zoomInterval, plotRanges, MAX_ZOOM } = require("./plot.js");
+const { zoomInterval, panInterval, plotRanges, MAX_ZOOM } = require("./plot.js");
 const { shuffledBag } = require("./deal.js");
 
 let failures = 0;
@@ -208,6 +208,53 @@ for (const problem of PROBLEMS) {
     pixels < 0.5,
     `${pixels.toFixed(2)}px apart on a ${PLOT_PIXELS}px plot`,
   );
+}
+
+/* Dragging the graph.  A pan is a pure translation measured in fractions of the
+   visible window, so it must move the window without rescaling it -- which is
+   what keeps every angle, and so the zoom's whole argument, intact -- and the
+   zoom must go on magnifying about the marked point, holding that point
+   wherever the drag put it on screen. */
+console.log("Dragging moves the window without rescaling it");
+check("panInterval by 0 is the identity",
+  panInterval([-2, 3], 0).every((v, i) => v === [-2, 3][i]));
+check("panInterval by a whole window moves it one width",
+  panInterval([-2, 3], 1).every((v, i) => closeTo(v, [3, 8][i], 1e-12)));
+check("panInterval by a negative fraction moves it the other way",
+  panInterval([-2, 3], -0.4).every((v, i) => closeTo(v, [-4, 1][i], 1e-12)));
+
+for (const problem of PROBLEMS) {
+  const label = problem.tex.replace(/\\d?frac/g, "frac");
+  const { f, a } = problem;
+  const fa = f(a);
+  const spec = { f, a, fa, xRange: problem.window };
+  const span = ([low, high]) => high - low;
+  const inFrame = (value, [low, high]) => (value - low) / (high - low);
+
+  /* No drag at all must leave every existing window exactly as it was. */
+  const plain = plotRanges({ ...spec, zoom: 1 }, COLUMNS);
+  const still = plotRanges({ ...spec, zoom: 1, pan: { x: 0, y: 0 } }, COLUMNS);
+  check(`${label}: a zero pan changes nothing`,
+    [0, 1].every(i => plain.xRange[i] === still.xRange[i] && plain.yRange[i] === still.yRange[i]));
+
+  for (const pan of [{ x: 0.3, y: -0.2 }, { x: -1.7, y: 2.5 }]) {
+    const screen = [];
+    for (const zoom of [1, 100, MAX_ZOOM]) {
+      const flat = plotRanges({ ...spec, zoom }, COLUMNS);
+      const moved = plotRanges({ ...spec, zoom, pan }, COLUMNS);
+      check(`${label}: pan (${pan.x}, ${pan.y}) at ${zoom}x keeps both spans`,
+        closeTo(span(moved.xRange), span(flat.xRange), 1e-9) &&
+          closeTo(span(moved.yRange), span(flat.yRange), 1e-9),
+        `x ${span(flat.xRange)} -> ${span(moved.xRange)}, y ${span(flat.yRange)} -> ${span(moved.yRange)}`);
+      check(`${label}: pan (${pan.x}, ${pan.y}) at ${zoom}x shifts by that fraction of the window`,
+        closeTo(moved.xRange[0] - flat.xRange[0], pan.x * span(flat.xRange), 1e-9) &&
+          closeTo(moved.yRange[0] - flat.yRange[0], pan.y * span(flat.yRange), 1e-9));
+      screen.push([inFrame(a, moved.xRange), inFrame(fa, moved.yRange)]);
+    }
+    check(`${label}: pan (${pan.x}, ${pan.y}) holds the point in place on screen as the zoom changes`,
+      screen.every(([sx, sy]) => closeTo(sx, screen[0][0], 1e-6) && closeTo(sy, screen[0][1], 1e-6)),
+      `screen positions ${JSON.stringify(screen)}`);
+  }
 }
 
 /* The order problems arrive in.  A shuffle is the kind of thing that looks

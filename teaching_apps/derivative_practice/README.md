@@ -40,8 +40,13 @@ right shows the graph of `f` with the point `(a, f(a))` marked.
   rule a problem exercises is not named on screen either, since working out
   which rule applies is part of the exercise.
 - **Zoom.** A slider under the graph magnifies about the point, with a readout
-  of the magnification and of the visible x-interval, and a **Reset** button.
-  See [Zoom](#zoom).
+  of the magnification and of the visible x-interval. See [Zoom](#zoom).
+- **Drag to pan.** Clicking and dragging the graph moves it left, right, up and
+  down, and the picture stays under the pointer as it goes. It works with a
+  mouse, a pen or a finger; on a touch screen, a finger on the graph moves the
+  graph rather than scrolling the page. See [Panning](#panning).
+- **Reset** returns the graph to the problem's own window, undoing both the
+  zoom and any dragging. Changing problem does the same.
 - Light and dark themes follow the system setting.
 
 ## What the answer box accepts
@@ -127,6 +132,23 @@ between 8% and 89% of the way across depending on the problem, rather than
 gliding to the centre, so zooming reads as plain magnification about a fixed
 point.
 
+## Panning
+
+Dragging the graph slides the window without rescaling it. A pan is a pure
+translation, so, like the zoom, it leaves every on-screen angle alone: a wrong
+line looks exactly as wrong wherever the graph has been dragged to.
+
+The pan is kept as a fraction of the visible window rather than as a distance
+in x or y, which has two consequences:
+
+- a drag moves the picture pixel for pixel at any magnification, whether the
+  window is ten units wide or a thousandth of a unit;
+- the zoom still magnifies about the marked point, and holds that point
+  wherever the drag left it on screen. Drag the point into a corner and zoom,
+  and it stays in the corner while everything around it magnifies.
+
+Nothing stops the point being dragged out of view. **Reset** brings it back.
+
 ## Run
 
 The app is self-contained, so serve this directory:
@@ -156,16 +178,16 @@ visited before may show the previous version for that long after a deploy.
 | `styles.css` | layout and the light and dark themes |
 | `problems.js` | the question bank: 250 problems, each with `f`, `fp`, the point `a`, TeX for all of it, and the graph's x-window |
 | `parse.js` | the expression evaluator: tokenizer plus recursive descent, no `eval` |
-| `plot.js` | canvas drawing: axes, ticks, the curve, the lines, the point; the zoom window and `MAX_ZOOM` |
+| `plot.js` | canvas drawing: axes, ticks, the curve, the lines, the point; the zoom and pan windows and `MAX_ZOOM` |
 | `deal.js` | which problem comes next: an unbiased shuffled bag, kept out of `app.js` so it can be tested |
-| `app.js` | wiring and grading |
+| `app.js` | wiring, grading and dragging |
 | `tests.js` | the test suites, below |
 | `vendor/katex/` | KaTeX, vendored so the app is self-contained and works offline |
 | `tools/` | build-time only, never loaded by the app: the generator that produced the bank, and the verifier that checks each candidate against every test before it is written out. See `tools/README.md` |
 
 ## Tests
 
-`node tests.js` runs eight suites:
+`node tests.js` runs nine suites:
 
 1. **Every stored derivative agrees with a finite difference.** Each `fp` is
    checked against a five-point finite difference of its own `f`, at the
@@ -183,10 +205,15 @@ visited before may show the previous version for that long after a deploy.
    gap from its tangent must fall off like `1/zoom` while a deliberately wrong
    line's gap does not move, and every curve must be within half a pixel of
    its tangent at `MAX_ZOOM`.
-7. **Every TeX string in the bank renders** through the vendored KaTeX. The
+7. **Dragging moves the window without rescaling it.** For every problem, at
+   1x, 100x and 10,000x, a pan must leave both spans unchanged, shift the
+   window by exactly the dragged fraction of itself, and hold the marked point
+   at the same place on screen as the zoom changes. A zero pan must leave the
+   window bit-for-bit as it was.
+8. **Every TeX string in the bank renders** through the vendored KaTeX. The
    app renders with `throwOnError` off, so malformed TeX would otherwise reach
    the page as red text rather than fail anywhere visible.
-8. **Problems are dealt in a random order that covers the whole bank.** Driven
+9. **Problems are dealt in a random order that covers the whole bank.** Driven
    by a seeded generator: the bag holds every problem exactly once, no problem
    follows itself, and over six thousand deals each problem comes up about
    equally often.

@@ -442,6 +442,86 @@ errors. That establishes the behaviour, not the look: the button's width
 changes slightly between its two labels, which has not been seen in a browser.
 `node tests.js` still passes, and never reached `app.js` in the first place.
 
+### 2026-09-10 — the graph can be dragged
+
+Clicking and dragging the graph now pans it left, right, up and down, with
+the picture staying under the pointer. **Reset** undoes the drag along with
+the zoom, and changing problem does the same.
+
+**The one design decision, and why.** The pan is stored as a fraction of the
+visible window, not as a distance in x and y, and it is applied *after* the
+zoom. Two things follow, both deliberate:
+
+- a drag moves the picture pixel for pixel at any magnification. Stored in x
+  units, a pan that moved things sensibly at 1x would fling them off screen at
+  10,000x, or crawl at 1x if it was tuned for 10,000x;
+- the zoom keeps magnifying about the marked point, as it always has, and now
+  holds that point wherever the drag put it on screen. The alternative,
+  zooming about the centre of whatever is in view, would have been the more
+  familiar map-style behaviour, but it would have broken "magnified about the
+  point", which is what the zoom is there to demonstrate.
+
+A pan is a pure translation, so it rescales nothing and every on-screen angle
+survives it. That is what keeps the zoom's whole argument intact: a wrong line
+is exactly as wrong wherever the graph has been dragged.
+
+Nothing clamps the pan, so the point can be dragged out of view. That was left
+alone on purpose: the request was to move freely, and **Reset** is one click
+away.
+
+**How it was done.**
+
+- `plot.js`: a new `panInterval()` slides an interval by a fraction of its own
+  width, and `plotRanges()` applies it to both axes after `zoomInterval()`. A
+  panned window is resampled rather than reusing the problem's own samples.
+  `drawPlot()` now also returns the plot's size in pixels, which is what a
+  drag's pixels are divided by. A comment saying the point "must never be
+  off-screen" was narrowed to "must never *start* off-screen".
+- `app.js`: pointer events, so mouse, pen and touch all work. The pan is
+  worked out from where the drag started rather than added up move by move,
+  so the picture ends exactly under the pointer however many events the drag
+  is split into. Pointer capture keeps a drag alive if the pointer leaves the
+  canvas, and losing that capture ends the drag, so a drag can never be left
+  stuck on if a `pointerup` goes missing. Only the primary button starts a
+  drag, and while one is under way a second finger can neither move it nor
+  start a new one.
+- `styles.css`: a grab cursor, a grabbing one while dragging, and
+  `touch-action: none` on the canvas.
+- `index.html`: one sentence added to the note under the graph.
+
+**One trade-off worth knowing about.** `touch-action: none` is what lets a
+finger drag the graph on a phone or tablet, but it also means a swipe that
+starts on the graph will not scroll the page. On a narrow screen the graph is
+nearly the full width, so scrolling has to start from above or below it. The
+alternative, letting vertical swipes scroll the page, would have made vertical
+panning impossible on touch.
+
+**How it was checked.**
+
+- A ninth suite in `tests.js`, *Dragging moves the window without rescaling
+  it*, checks every problem at 1x, 100x and 10,000x under two different pans:
+  both spans unchanged, the shift exactly the dragged fraction of the window,
+  the point held at the same place on screen as the zoom changes, and a zero
+  pan leaving the window bit-for-bit as before. It was checked for teeth by
+  planting bugs in a scratch copy of `plot.js`. A pan that rescaled the
+  window by 0.01% failed 2,835 checks, and a pan in x units rather than
+  fractions failed 2,002. Applying the pan before the zoom instead of after
+  failed nothing, correctly: the zoom is affine, so the two orders give the
+  same window.
+- The real page was driven in jsdom with the canvas given a fixed size and a
+  do-nothing drawing context, so `drawPlot()` ran in full. 28 checks passed,
+  measured as pixel positions of the marked point: it follows the pointer
+  exactly, including across several moves and a second drag; it stays put on
+  screen as the zoom slider moves; a drag at 10,000x still moves it pixel for
+  pixel; Reset restores the window bit-for-bit; the right button, a hover
+  with no button held, and a second pointer (moving, or pressing mid-drag) do
+  not pan; `pointercancel` and lost pointer capture both end a drag; a new problem opens undragged; and Show answer and submitting leave
+  the pan alone. The earlier Show/Hide check still passes.
+
+Not seen in a browser. In particular, how dragging *feels* at speed, whether
+redrawing on every pointer event keeps up on a slow machine, and the touch
+behaviour on a real phone are all unverified.
+
 ---
 
 ## Next steps

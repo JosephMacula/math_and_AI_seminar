@@ -25,7 +25,8 @@ const formatTick = (value, step) => {
    the 2nd and 98th percentile.  Trimming is what keeps a vertical asymptote
    (tan x, 1/x^2) from flattening the interesting part of the graph into a
    horizontal line.  The value f(a) is then forced back in, since the marked
-   point must never be off-screen. */
+   point must never start off-screen.  (The student can drag it off; that is
+   their choice, and Reset brings it back.) */
 function verticalRange(values, fa) {
   const sorted = values.filter(Number.isFinite).sort((u, v) => u - v);
   if (!sorted.length) return [-1, 1];
@@ -55,6 +56,18 @@ function zoomInterval([low, high], center, zoom) {
   return [center - (center - low) / zoom, center + (high - center) / zoom];
 }
 
+/* Slide an interval by `fraction` of its own width.  Dragging the graph is
+   recorded in these units rather than in x or y, so a drag of so many pixels
+   moves the picture that many pixels at any magnification.  It is applied
+   after the zoom, which therefore still magnifies about the marked point, and
+   keeps that point wherever the drag left it on screen.  A pure translation
+   rescales nothing, so every on-screen angle survives it just as it survives
+   the zoom. */
+function panInterval([low, high], fraction) {
+  const shift = fraction * (high - low);
+  return [low + shift, high + shift];
+}
+
 const sampleAcross = (f, [low, high], columns) => {
   const values = [];
   for (let column = 0; column <= columns; column++) {
@@ -67,13 +80,17 @@ const sampleAcross = (f, [low, high], columns) => {
    the ranges the canvas will use. */
 function plotRanges(spec, columns) {
   const zoom = Math.max(1, spec.zoom || 1);
+  const pan = spec.pan || { x: 0, y: 0 };
   const baseValues = sampleAcross(spec.f, spec.xRange, columns);
   const baseY = verticalRange(baseValues, spec.fa);
   return {
-    xRange: zoomInterval(spec.xRange, spec.a, zoom),
-    yRange: zoomInterval(baseY, spec.fa, zoom),
+    xRange: panInterval(zoomInterval(spec.xRange, spec.a, zoom), pan.x),
+    yRange: panInterval(zoomInterval(baseY, spec.fa, zoom), pan.y),
     baseValues,
     zoom,
+    /* Whether the drawn window is still the problem's own, whose samples
+       baseValues already holds. */
+    untouched: zoom === 1 && pan.x === 0 && pan.y === 0,
   };
 }
 
@@ -97,10 +114,10 @@ function drawPlot(canvas, spec) {
   const plotHeight = bottom - top;
   if (plotWidth <= 0 || plotHeight <= 0) return;
 
-  const { xRange, yRange, baseValues, zoom } = plotRanges(spec, plotWidth);
+  const { xRange, yRange, baseValues, zoom, untouched } = plotRanges(spec, plotWidth);
   const [xLow, xHigh] = xRange;
   const [yLow, yHigh] = yRange;
-  const values = zoom === 1 ? baseValues : sampleAcross(spec.f, xRange, plotWidth);
+  const values = untouched ? baseValues : sampleAcross(spec.f, xRange, plotWidth);
 
   const toX = x => left + ((x - xLow) / (xHigh - xLow)) * plotWidth;
   const toY = y => bottom - ((y - yLow) / (yHigh - yLow)) * plotHeight;
@@ -194,8 +211,10 @@ function drawPlot(canvas, spec) {
   ctx.stroke();
 
   ctx.restore();
-  return { xRange, yRange, zoom };
+  /* The plot's size in pixels is returned so that a drag, measured in pixels,
+     can be turned into the fraction of the window that panInterval takes. */
+  return { xRange, yRange, zoom, plotWidth, plotHeight };
 }
 
 if (typeof module !== "undefined")
-  module.exports = { niceStep, verticalRange, formatTick, zoomInterval, plotRanges, MAX_ZOOM };
+  module.exports = { niceStep, verticalRange, formatTick, zoomInterval, panInterval, plotRanges, MAX_ZOOM };
