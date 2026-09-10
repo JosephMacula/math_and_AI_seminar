@@ -45,7 +45,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      # enablement lets the workflow turn Pages on itself the first time it
+      # runs; without it the action fails with "Get Pages site failed" on a
+      # repository where Pages has never been configured.
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: teaching_apps
