@@ -6,10 +6,19 @@ The `derivative_practice` app, which lives in the `teaching_apps` directory of
 the `math_and_AI_seminar` repo. `teaching_apps` is a test harness for Claude,
 and this is its only app so far.
 
-This file sits in the app's own directory and is the single place to look.
-Paths below are relative to this directory unless stated otherwise. The
-reference material that used to live in `README.md` beside it has been merged
-in below, under [Derivative practice](#derivative-practice).
+The two documents in this directory have separate jobs:
+
+- **`project_status.md`** (this file) is the running account of the work: what
+  was done, when, how, and why, plus what is still open. Entries are appended
+  and not rewritten, so an older entry describes things as they stood then.
+- **`README.md`** is the summary of the app's features and functionality as
+  they stand in the current version. It is rewritten whenever the app changes,
+  and it carries no history.
+
+A change to the app therefore usually means both: a new entry here, and an
+update to `README.md` so it describes the app as it now is.
+
+Paths below are relative to this directory unless stated otherwise.
 
 ---
 
@@ -49,7 +58,7 @@ A slider under the graph magnifies about `(a, f(a))`, 1× to 10,000×, linear in
 the exponent. Both axes shrink by the same factor, so every on-screen angle is
 preserved: the curve straightens out while a wrong line keeps its angular error
 exactly. That invariance is the point — magnifying cannot flatter a wrong
-answer. Full description under [Zoom](#zoom).
+answer. Full description under Zoom in `README.md`.
 
 **How it was done**
 
@@ -360,178 +369,67 @@ string (`?v=2`) makes a different cache key and settles the question at once,
 and a hard reload does the same. It only affects people who visited earlier;
 a first-time visitor is never served the stale copy.
 
----
 
-## Derivative practice
+### 2026-09-10 — `README.md` and this file given separate jobs
 
-*Merged from `README.md` in this directory.*
+The two files had converged: the README's content had been merged into this
+file under a *Derivative practice* heading, and this session was about to
+reduce the README to a pointer. That was the wrong direction. The intended
+split, now recorded in the [Overview](#overview):
 
-A student is shown a function `f` and a point `a`, types the value of `f'(a)`,
-and presses Enter. The graph then draws the line through `(a, f(a))` with the
-slope they gave. A right answer grazes the curve; a wrong one visibly cuts
-across it.
+- this file is the running account of project work;
+- `README.md` is the summary of what the current version of the app does.
 
-Nothing is drawn while they type. The line appears only on Enter, so it reads
-as an answer to a claim rather than a hint.
+**What changed.**
 
-Problems arrive in a random order, dealt from a shuffled bag that empties
-before anything repeats, and no running score is shown. **Previous** walks back
-through the problems already seen. The rule a problem exercises is not named on
-screen — working out which rule applies is part of the exercise.
+- The merged *Derivative practice* section was removed from this file. The
+  README is now the only description of the app, so there is nothing left to
+  update in two places.
+- `README.md` was rewritten to describe the app as it is. It gained what it
+  had been missing: a *Using it* section (feedback and its four diagnoses,
+  **Show answer**, the zoom readouts and **Reset**, the light and dark themes),
+  the problem bank's topic table and exclusions, deployment, a per-suite
+  description of the tests, and the brace-free-exponent rule for
+  `answerTex`. It lost what was history rather than description, such as how
+  the zoom test's first draft failed, which stays recorded in this file's
+  2026-09-09 entry.
+- *Next steps* below dropped the two items the entry above this one completed
+  (git, deployment) and the item about reducing `README.md` to a pointer.
 
-### Run
-
-The app is self-contained — KaTeX is vendored inside this directory — so serve
-this directory:
-
-    python3 -m http.server 8000
-
-Then open <http://localhost:8000/>.
-
-Run the tests with
-
-    node tests.js
-
-### What the answer box accepts
-
-Exact expressions, not just decimals: `8`, `-1/4`, `4/5`, `sqrt(2)/2`,
-`1/sqrt(2)`, `pi/6`, `2*pi/3`, `3e`, `-2/e`, `ln(e)`, `2^3`. Juxtaposition
-means multiplication, so `2pi` and `3e` parse as expected. Scientific notation
-is deliberately absent — `2e` has to mean `2e`, not `2 x 10^n`.
-
-Grading has two tiers, set at the top of `app.js`:
-
-| agreement with `f'(a)` | response |
-| --- | --- |
-| within `EXACT_TOLERANCE` (1e-9 relative) | correct |
-| within `ROUGH_TOLERANCE` (5e-3 relative) | "right number, rounded — give it exactly" |
-| otherwise | wrong, with the line's specific defect named |
-
-The middle tier is the point of parsing exact expressions at all: `0.707` gets
-told to come back with `sqrt(2)/2` instead of quietly passing.
-
-### Files
-
-| file | what it holds |
-| --- | --- |
-| `problems.js` | the question bank: 250 problems, each with `f`, `fp`, the point `a`, TeX for all of it, and the graph's x-window |
-| `parse.js` | the expression evaluator: tokenizer plus recursive descent, no `eval` |
-| `plot.js` | canvas drawing: axes, ticks, the curve, the lines, the point; the zoom window and `MAX_ZOOM` |
-| `deal.js` | which problem comes next: an unbiased shuffled bag, kept out of `app.js` so it can be tested |
-| `app.js` | wiring and grading |
-| `tests.js` | see below |
-| `vendor/katex/` | KaTeX, vendored so the app is self-contained and works offline |
-| `tools/` | build-time only, never loaded by the app: the generator that produced the bank and the verifier that checks each candidate against every test. See `tools/README.md` |
-
-### Tests
-
-The suite that matters checks **every stored derivative against a five-point
-finite difference of the corresponding `f`**, at the marked point and at three
-neighbours. The two share no code, so they agree only if the calculus in the
-bank was done correctly. Every `answerTex` is also stripped of its TeX and run
-through the parser, which keeps the displayed answer from drifting away from
-the graded value. Every TeX string the student sees is also rendered through
-the vendored KaTeX, since the app renders with `throwOnError` off and malformed
-TeX would otherwise reach the page as red text rather than fail anywhere
-visible.
-
-The dealing has its own suite, driven by a seeded generator: that the bag holds
-every problem exactly once, that no problem follows itself, and that over six
-thousand deals each problem comes up about equally often.
-
-The second suite that earns its keep checks the zoom's claim as arithmetic
-rather than trusting it as a picture. For every problem it measures, as a
-fraction of the visible height, how far the curve strays from its true tangent
-at the window's edge and how far a deliberately wrong line strays, and checks
-that the first falls off like `1/zoom` while the second does not move at all.
-It was worth writing: the first draft of it asserted the `1/zoom` rate from 1×
-and failed, which is how the 100× onset came to be measured rather than
-assumed.
-
-### Adding problems
-
-Append to `PROBLEMS` in `problems.js` and run `node tests.js`. For more than a
-handful at a time, `tools/` generates and verifies them in bulk instead. The required
-fields are `topic`, `tex`, `f`, `fp`, `fpTex`, `a`, `aTex`, `answerTex` and
-`window`. Three things to watch:
-
-- `window` also sets the zoom: magnifying shrinks this interval about `a`,
-  keeping each side's share, so a window with `a` very near one end will stay
-  lopsided at every magnification.
-- `window` should keep vertical asymptotes near the edge of the picture. The
-  y-range is inferred from the function's values across the window, trimmed at
-  the 2nd and 98th percentile, so an asymptote sitting in the middle of the
-  window will still be survivable but a bit ugly.
-- `answerTex` is what the student is told the answer is, so it should be the
-  exact form (`-\dfrac{2}{e}`), not a decimal. The tests check that it parses
-  back to `fp(a)`.
-
-### Zoom
-
-The slider under the graph magnifies about `(a, f(a))`, from 1× up to
-`MAX_ZOOM` (10,000×, set in `plot.js`). It is linear in the exponent, so equal
-travel is equal magnification: a quarter of the way in is 10×, halfway 100×.
-
-**Both axes shrink by the same factor.** That is the whole design, and the one
-thing not to change casually. Because the frame shrinks along with the window,
-every on-screen angle survives magnification untouched, so:
-
-- the curve's own bend is second order in the window width against a
-  first-order frame, and dies away like `1/zoom` — it straightens into a line;
-- a wrong slope's error is first order against a first-order frame, so it is
-  *exactly* as visible at 10,000× as at 1×.
-
-Which is the point. Zooming cannot flatter a wrong answer: the gap between a
-correct line and the curve goes to nothing, and the gap between a wrong line
-and the curve does not budge. Local linearity is the thing being shown, and
-the invariance is what makes the showing honest.
-
-The falloff only reaches its `1/zoom` rate once the window is small enough for
-the quadratic term to dominate, at around 100× here. 10,000× is the first
-decade at which every function in the bank sits within half a pixel of its own
-tangent (worst case `x sin x`, 0.43px; at 1,000× it is still a visible 4.3px),
-which is why that is where the slider stops. `tests.js` checks all of this.
-
-The point of tangency stays pinned where it sits in the problem's own window —
-between 8% and 89% of the way across, depending on the problem — rather than
-gliding to the centre, so zooming reads as plain magnification about a fixed
-point. Zoom resets to 1× on every problem change.
+Every factual claim in the new README was checked against the code: the
+problem and topic counts against `problems.js`, the grading tolerances and
+feedback wording against `app.js`, `MAX_ZOOM` against `plot.js`, the suite
+names and the half-pixel assertion against `tests.js`, and the deploy trigger
+against `.github/workflows/pages.yml`. `node tests.js` passes.
 
 ---
 
 ## Next steps
 
-- **Put this directory under git.** Nothing here is tracked. Deferred twice
-  now, and the amount at stake has grown from one afternoon's work to a
-  250-problem bank and the tooling that built it. `tools/verified.json` is
-  generated output, 3MB, and is already listed in the repository's
-  `.gitignore` for when this happens.
-- **Deploy somewhere that outlives the Codespace.** GitHub Pages fits — static
-  files, no build step — but the repo would have to be public and `vendor/`
-  committed. Until then there is no link that can be given to a student.
 - **Try it with a class.** The open question is no longer whether there are
   enough problems but whether the mix is right, and whether the difficulty
-  lands. Per-topic counts are in the 2026-09-10 entry above; they were set by
-  judgement, not by evidence about what a class needs.
+  lands. Per-topic counts are in `README.md`; they were set by judgement, not
+  by evidence about what a class needs.
 - **A topic filter.** Random dealing across the whole bank is right for review,
   but a student working through the chain rule this week cannot ask for only
   chain-rule problems. `topic` is already on every problem for exactly this;
   only the UI is missing.
+- **Add the `SessionStart` hook** so the startup instructions in `CLAUDE.md`
+  fire wherever a session begins, not only in this directory or below it.
+  Raised on 2026-09-09 and not yet done.
 - Look through the graphs. The drawing has been seen working, but not all 250
   windows have been looked at, and they were chosen by a verifier that checks
   geometry rather than appearance.
 - Possible: ease the point toward the centre of the frame at high zoom. It is
   pinned where the problem's window puts it (8%-89% across), which is standard
   zoom behaviour but leaves the most lopsided problems a little off-centre.
-- `README.md` in this directory is duplicated by the section above, and this
-  session updated both by hand — twice — which is exactly the drift the
-  duplication invites. Worth reducing to a pointer at this file.
 
 ## Note for future sessions
 
 On 2026-09-09 this file was overwritten by something outside the session at
 20:56:44 — reverted to its session-start content with the stray bytes `quick`
 prepended at byte 0. It was rewritten and re-verified. No other file was
-affected and `node tests.js` passed throughout. Since the file is untracked,
-there was no git copy to restore from; worth re-reading it from disk before
-trusting that an edit to it survived.
+affected and `node tests.js` passed throughout. The file was untracked then, so
+there was no git copy to restore from. It has been tracked since 2026-09-10,
+so `git diff` now shows any such change, but it is still worth re-reading the
+file from disk before trusting that an edit to it survived.
