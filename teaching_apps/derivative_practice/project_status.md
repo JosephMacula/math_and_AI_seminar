@@ -291,6 +291,53 @@ somewhere that outlives the Codespace; try the problems with a class and see
 whether the mix is right; add a topic filter. Details in
 [Next steps](#next-steps).
 
+### 2026-09-10 — under git, and deployed to GitHub Pages
+
+**The directory is under version control.** Deferred twice, done now. Two
+commits on `main`: the app and its deployment, then a fix to the workflow.
+`teaching_apps/` and the vendored KaTeX are tracked; `level_structures_proj/`
+was deliberately left alone, being someone else's project rather than part of
+this one. The repository was already public, so nothing became visible that
+was not already.
+
+Kept out on purpose: `.tools/` (9.2GB, already ignored) and
+`tools/verified.json` (3MB of generated candidates, regenerable by
+`node tools/build.js`).
+
+**KaTeX moved from the repository root into the app.** `vendor/` now sits
+inside `derivative_practice/` and `index.html` asks for `vendor/katex/` rather
+than `../../vendor/katex/`. Nothing else in the repo used it. The point is that
+the app directory is now self-contained: it can be served from anywhere,
+including as the root of a site, which is what makes a short deployment URL
+possible at all. Serving it no longer means serving the whole repository.
+
+**Deployment publishes `derivative_practice/` as the Pages site root**, so the
+app *is* the website: <https://josephmacula.github.io/math_and_AI_seminar/>.
+This is what the self-contained app directory buys — a directory that reaches
+up to `../../vendor/` cannot be a site root, and this one no longer does.
+
+A second teaching app would mean publishing `teaching_apps/` instead and giving
+each app its own folder. That was tried first and briefly deployed, with a
+small landing page at `teaching_apps/index.html`; the page was removed when the
+site root became the app itself, since nothing would have linked to it.
+
+**The deploy is gated on the tests.** `.github/workflows/pages.yml` runs
+`node tests.js` in a `test` job and the `deploy` job declares `needs: test`.
+If a stored derivative ever stops agreeing with its finite difference, the
+wrong answer does not reach a class. The test job passes in CI.
+
+**Blocked on one manual step, which is not something a token can do.** Creating
+a Pages site for the first time requires admin rights that neither available
+token has: the workflow's `GITHUB_TOKEN` is granted `pages: write` but not
+admin, and the Codespace token is refused the same call. Two deploys failed at
+`actions/configure-pages` — first with "Get Pages site failed", then, after
+adding `enablement: true`, with "Create Pages site failed: Resource not
+accessible by integration". The remedy is one switch in
+**Settings - Pages - Build and deployment - Source: GitHub Actions**, after
+which the workflow needs only to be re-run. `enablement: true` was left in
+place: once the site exists the action finds it and never attempts to create
+it, so the workflow stays correct for a repository that already has Pages on.
+
 ---
 
 ## Derivative practice

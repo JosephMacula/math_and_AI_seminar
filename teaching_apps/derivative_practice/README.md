@@ -1,7 +1,7 @@
 # Derivative practice
 
 **Live at
-<https://josephmacula.github.io/math_and_AI_seminar/derivative_practice/>.**
+<https://josephmacula.github.io/math_and_AI_seminar/>.**
 
 A student is shown a function `f` and a point `a`, types the value of `f'(a)`,
 and presses Enter. The graph then draws the line through `(a, f(a))` with the

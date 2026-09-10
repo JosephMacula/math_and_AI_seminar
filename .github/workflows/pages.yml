@@ -1,6 +1,9 @@
-# Publishes teaching_apps/ as the GitHub Pages site, so the apps land at
-#   https://josephmacula.github.io/math_and_AI_seminar/<app>/
-# and a new app needs no change here beyond its own directory.
+# Publishes derivative_practice/ as the GitHub Pages site, so the app itself is
+# the website:
+#   https://josephmacula.github.io/math_and_AI_seminar/
+# The app directory is self-contained -- KaTeX is vendored inside it -- which is
+# what lets it be served as a site root. A second teaching app would mean
+# publishing teaching_apps/ instead and letting each app have its own folder.
 #
 # The deploy is gated on the test suite. The bank is 250 generated problems
 # whose derivatives are checked against finite differences; if that ever stops
@@ -53,6 +56,6 @@ jobs:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: teaching_apps
+          path: teaching_apps/derivative_practice
       - id: deployment
         uses: actions/deploy-pages@v4
