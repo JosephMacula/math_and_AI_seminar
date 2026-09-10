@@ -25,9 +25,13 @@ right shows the graph of `f` with the point `(a, f(a))` marked.
   line is wrong: the wrong sign, horizontal where the curve is not, too steep,
   or too shallow. Input the parser cannot read gets a message saying why, and
   nothing is drawn.
-- **Show answer.** Reveals the derivative `f'(x)`, the exact value of `f'(a)`
-  with a decimal approximation, and draws the true tangent beside the
-  student's line.
+- **Show answer / Hide answer.** **Show answer** reveals the derivative
+  `f'(x)`, the exact value of `f'(a)` with a decimal approximation, and draws
+  the true tangent beside the student's line. The same button then reads
+  **Hide answer**, and pressing it closes the answer and takes the true tangent
+  off the graph, leaving the student's own line in place, so the problem can
+  be tried again without the answer in view. Changing problem always starts
+  with the answer hidden.
 - **Next and Previous.** Problems arrive in a random order, dealt from a
   shuffled bag that holds every problem once and empties before anything
   repeats. **Previous** walks back through the problems already seen, and is

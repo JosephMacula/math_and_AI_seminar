@@ -8,6 +8,7 @@ const canvas = $("#plot");
 const answerInput = $("#answer");
 const feedbackBox = $("#feedback");
 const revealBox = $("#reveal");
+const showButton = $("#show");
 const slopeReadout = $("#slope-readout");
 const legendStudent = $("#legend-student");
 const legendAnswer = $("#legend-answer");
@@ -112,7 +113,7 @@ function say(kind, html) {
 function loadProblem() {
   const current = problem();
   state.studentSlope = null;
-  state.revealed = false;
+  setRevealed(false);
   /* A new problem opens at its own window.  Carrying a 5,000x zoom over to a
      function the student has not looked at yet would show them a blank slope. */
   state.zoom = 1;
@@ -123,7 +124,6 @@ function loadProblem() {
   $("#prompt").innerHTML = `Enter the value of ${tex(`f'(${current.aTex})`)}.`;
 
   feedbackBox.hidden = true;
-  revealBox.hidden = true;
   slopeReadout.textContent = "";
   answerInput.value = "";
   answerInput.focus();
@@ -132,13 +132,29 @@ function loadProblem() {
   redraw();
 }
 
+/* One button both shows and hides the answer, and its label says which it
+   will do next. */
+function setRevealed(revealed) {
+  state.revealed = revealed;
+  revealBox.hidden = !revealed;
+  showButton.textContent = revealed ? "Hide answer" : "Show answer";
+  showButton.setAttribute("aria-expanded", String(revealed));
+}
+
 function reveal() {
   const current = problem();
-  state.revealed = true;
   revealBox.innerHTML =
     `<span class="label">Answer</span>${tex(current.fpTex, true)}` +
     tex(`f'(${current.aTex}) = ${current.answerTex} \\approx ${round(current.fp(current.a))}`, true);
-  revealBox.hidden = false;
+  setRevealed(true);
+  redraw();
+}
+
+/* Hiding takes back all of the answer, the true tangent on the graph as well
+   as the box, so the student can try the problem again without it in view.
+   Their own line stays where it was. */
+function hideAnswer() {
+  setRevealed(false);
   redraw();
 }
 
@@ -184,7 +200,7 @@ $("#answer-form").addEventListener("submit", event => {
   redraw();
 });
 
-$("#show").addEventListener("click", reveal);
+showButton.addEventListener("click", () => (state.revealed ? hideAnswer() : reveal()));
 
 zoomInput.addEventListener("input", () => {
   state.zoom = zoomFor(zoomInput.value);

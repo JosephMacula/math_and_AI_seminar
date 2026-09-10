@@ -402,6 +402,46 @@ feedback wording against `app.js`, `MAX_ZOOM` against `plot.js`, the suite
 names and the half-pixel assertion against `tests.js`, and the deploy trigger
 against `.github/workflows/pages.yml`. `node tests.js` passes.
 
+### 2026-09-10 — Show answer became a Show / Hide toggle
+
+Once **Show answer** was clicked there was no way to put the answer away again:
+the box stayed open until the problem changed. Now the same button toggles.
+After revealing, it reads **Hide answer**; pressing it closes the answer and it
+goes back to **Show answer**.
+
+A **×** close button inside the answer box was built and tested first, then
+replaced before it was committed: with **Show answer** still sitting just
+below the box, a second control for the same thing was redundant, and a
+button whose label says what it will do next is the plainer design. The ×
+left no trace; `index.html` and `styles.css` are back to how they were apart
+from two attributes on the button.
+
+**Hiding takes back the whole answer, not just the box.** The true tangent
+comes off the graph and its legend entry goes with it, returning the page to
+how it was before **Show answer**. The student's own line and the feedback on
+it stay. The reasoning: the likeliest reason to hide the answer is to try the
+problem again, and a dashed true tangent left on the graph would give it away
+as surely as the box would.
+
+**How it was done.** A single `setRevealed()` in `app.js` now owns the
+revealed state, the box's visibility and the button's label together, so they
+cannot disagree; `loadProblem()` calls it too, which is what resets the button
+when the problem changes with the answer open. The button carries
+`aria-expanded` and `aria-controls="reveal"`, so a screen reader announces it
+as a toggle for the answer box rather than as two unrelated buttons.
+
+**How it was checked.** There is still no browser in this container, so the
+real `index.html` and `app.js` were driven in jsdom (installed in a scratch
+directory, not in the project) with `drawPlot` spied on, since jsdom's canvas
+has no size and nothing gets drawn. 23 checks passed: the label and
+`aria-expanded` flip on each press; hiding withdraws the true tangent and its
+legend but keeps the student's line; reopening shows the answer once, not
+twice; **Next** and **Previous** pressed with the answer open both land on a
+problem with it hidden and the button reading **Show answer**; and no script
+errors. That establishes the behaviour, not the look: the button's width
+changes slightly between its two labels, which has not been seen in a browser.
+`node tests.js` still passes, and never reached `app.js` in the first place.
+
 ---
 
 ## Next steps
