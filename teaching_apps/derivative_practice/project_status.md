@@ -522,10 +522,65 @@ Not seen in a browser. In particular, how dragging *feels* at speed, whether
 redrawing on every pointer event keeps up on a slow machine, and the touch
 behaviour on a real phone are all unverified.
 
+### 2026-09-10 15:00 UTC — status
+
+Where things stand at the end of this session, which ran from about 14:15 to
+15:00 UTC. It started with the startup steps in `CLAUDE.md`, and then:
+
+| commit | what it did |
+| --- | --- |
+| `ed728aa` | gave `README.md` and this file separate jobs, and rewrote the README around the current app |
+| `71bd316` | committed the user's edit to `CLAUDE.md` adding "read `README.md`" as a startup step |
+| `47de599` | turned **Show answer** into a Show / Hide toggle |
+| `ac61d90` | made the graph draggable to pan it |
+
+Each is described in its own entry above. All four were pushed to `main` in
+three pushes, the first two together, and each push set off a Pages deploy
+that passed its tests in CI and succeeded.
+
+**The app is live and current** at
+<https://josephmacula.github.io/math_and_AI_seminar/>. The deployed `app.js`
+and `plot.js` were fetched after each deploy and contain the new code.
+
+**The tests pass: 9 suites, 11,488 individual checks**, up from 8 suites and
+7,735 at the start of the session. The difference is exactly the new drag
+suite's 3,753. Both figures were counted by instrumenting `check()` in a
+scratch copy. One thing worth knowing when counting: the KaTeX suite *skips*
+rather than fails when `vendor/` is missing, so a copy of `tests.js` without
+`vendor/` beside it reports "All checks passed" on 1,500 fewer checks. That
+happened once this session and briefly looked like a discrepancy.
+
+**The app's interface code is now tested, but not in the repository.** Both
+features this session live mostly in `app.js`, which `tests.js` cannot reach
+because it is all DOM. They were checked by driving the real page in jsdom,
+with 23 checks for the toggle and 28 for dragging. Those scripts and jsdom
+itself were in a scratch directory that does not outlive the session, so
+nothing will catch a regression in either feature. See *Next steps*.
+
+**Still unseen in a browser: everything this session added.** The toggle's
+slight change in width between its two labels, how dragging feels, whether
+redrawing on every pointer event keeps up on a slow machine, and touch on a
+real phone. The arithmetic behind panning is verified; how it looks and feels
+is not.
+
+**Documentation.** `README.md` now describes the current app, including the
+toggle, dragging and a new *Panning* section, and this file carries the
+history. The division is recorded in the Overview at the top, so the next
+session sees it as soon as it starts.
+
 ---
 
 ## Next steps
 
+- **Look at this session's changes in a browser**, on a phone as well as a
+  desktop: the Show / Hide toggle, and dragging at 1x and deep in the zoom.
+- **Keep the interface checks.** The 51 jsdom checks written this session were
+  thrown away with the scratch directory, so `app.js` has no tests in the
+  repository. Bringing them in means a `package.json` and jsdom as a
+  development dependency, which is at odds with the app's no-npm design,
+  though it would touch only testing and never what is served. The
+  alternative is a small hand-rolled DOM stub in `tests.js`. Worth deciding
+  before `app.js` grows further.
 - **Try it with a class.** The open question is no longer whether there are
   enough problems but whether the mix is right, and whether the difficulty
   lands. Per-topic counts are in `README.md`; they were set by judgement, not
@@ -534,15 +589,19 @@ behaviour on a real phone are all unverified.
   but a student working through the chain rule this week cannot ask for only
   chain-rule problems. `topic` is already on every problem for exactly this;
   only the UI is missing.
+- **Panning from the keyboard.** Dragging needs a pointer. A keyboard user can
+  zoom with the slider and use Reset, but cannot pan. Arrow keys on a
+  focusable canvas would close that gap using the same `state.pan`.
 - **Add the `SessionStart` hook** so the startup instructions in `CLAUDE.md`
   fire wherever a session begins, not only in this directory or below it.
   Raised on 2026-09-09 and not yet done.
 - Look through the graphs. The drawing has been seen working, but not all 250
   windows have been looked at, and they were chosen by a verifier that checks
   geometry rather than appearance.
-- Possible: ease the point toward the centre of the frame at high zoom. It is
-  pinned where the problem's window puts it (8%-89% across), which is standard
-  zoom behaviour but leaves the most lopsided problems a little off-centre.
+- ~~Ease the point toward the centre of the frame at high zoom.~~ Largely
+  answered by panning: a student who finds a problem's point lopsided can now
+  drag it to the middle, and the zoom keeps it there. Worth revisiting only if
+  a class finds the default windows awkward.
 
 ## Note for future sessions
 

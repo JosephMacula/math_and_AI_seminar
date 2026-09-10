@@ -14,7 +14,9 @@ vendored in `vendor/`. It works offline once loaded.
 ## Using it
 
 The page has two panels. The left shows the problem and takes the answer; the
-right shows the graph of `f` with the point `(a, f(a))` marked.
+right shows the graph of `f` with the point `(a, f(a))` marked. A legend under
+the graph names each line as it appears: the curve, the student's line
+(solid), and the true tangent (dashed).
 
 - **Answering.** Type the value of `f'(a)` and press Enter (or **Draw**).
   Nothing is drawn while typing. The line appears only on Enter, so it reads
@@ -127,10 +129,11 @@ which every function in the bank sits within half a pixel of its own tangent
 (worst case `x sin x`, 0.43px; at 1,000x it is still a visible 4.3px), which is
 why that is where the slider stops.
 
-The point of tangency stays pinned where it sits in the problem's own window,
-between 8% and 89% of the way across depending on the problem, rather than
-gliding to the centre, so zooming reads as plain magnification about a fixed
-point.
+The point of tangency stays pinned where it sits on screen rather than gliding
+to the centre, so zooming reads as plain magnification about a fixed point. In
+the problem's own window that is between 8% and 89% of the way across,
+depending on the problem; once the graph has been dragged, it is wherever the
+drag left it (see [Panning](#panning)).
 
 ## Panning
 
