@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Derivative Practice</title>
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="styles.css">
+<script src="vendor/katex/katex.min.js" defer></script>
+<script src="parse.js" defer></script>
+<script src="problems.js" defer></script>
+<script src="deal.js" defer></script>
+<script src="plot.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <p class="eyebrow">Calculus</p>
+  <h1>Derivative practice</h1>
+  <p class="lede">
+    Work out the derivative of <span data-tex="f"></span> at the marked point and
+    enter its value. The graph draws the line through
+    <span data-tex="(a, f(a))"></span> with the slope you gave: a correct answer
+    grazes the curve, a wrong one cuts across it.
+  </p>
+</header>
+
+<div class="panels">
+
+  <section class="card problem-panel">
+    <div class="panel-head">
+      <h2>Problem</h2>
+    </div>
+
+    <div class="statement" id="statement"></div>
+    <div class="statement point" id="point"></div>
+
+    <form id="answer-form" autocomplete="off">
+      <label for="answer" id="prompt">Enter the value of the derivative.</label>
+      <div class="entry">
+        <input id="answer" name="answer" inputmode="text" placeholder="e.g. 8, -1/4, sqrt(2)/2, 3e" required>
+        <button type="submit">Draw</button>
+      </div>
+      <p class="hint">
+        Exact expressions welcome: <code>pi/6</code>, <code>-2/e</code>,
+        <code>sqrt(2)/2</code>, <code>4/5</code>.
+      </p>
+    </form>
+
+    <div class="feedback" id="feedback" hidden></div>
+
+    <div class="answer-reveal" id="reveal" hidden></div>
+
+    <div class="actions">
+      <button type="button" id="prev" class="ghost">Previous</button>
+      <button type="button" id="show" class="ghost">Show answer</button>
+      <button type="button" id="next" class="ghost">Next</button>
+    </div>
+  </section>
+
+  <section class="card graph-panel">
+    <div class="panel-head">
+      <h2>Graph</h2>
+      <span class="counter" id="slope-readout"></span>
+    </div>
+    <canvas id="plot" aria-label="Graph of the function with the tangent line"></canvas>
+
+    <div class="zoom">
+      <label for="zoom">Zoom</label>
+      <input id="zoom" type="range" min="0" max="100" step="1" value="0">
+      <span class="counter" id="zoom-readout">&times;1</span>
+      <button type="button" id="zoom-reset" class="ghost small">Reset</button>
+    </div>
+    <p class="hint zoom-note">
+      <span id="zoom-window"></span> &mdash; magnified about the point, equally
+      in both directions. The curve straightens as you go in: that is local
+      linearity. A correct line settles onto it and disappears into it; a wrong
+      one keeps its angle however far you zoom.
+    </p>
+
+    <ul class="legend">
+      <li><span class="swatch curve"></span><span data-tex="y = f(x)"></span></li>
+      <li id="legend-student" hidden><span class="swatch student"></span>your line</li>
+      <li id="legend-answer" hidden><span class="swatch answer"></span>true tangent</li>
+    </ul>
+  </section>
+
+</div>
+</main>
+</body>
+</html>

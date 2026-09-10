@@ -1,0 +1,53 @@
+# Publishes teaching_apps/ as the GitHub Pages site, so the apps land at
+#   https://josephmacula.github.io/math_and_AI_seminar/<app>/
+# and a new app needs no change here beyond its own directory.
+#
+# The deploy is gated on the test suite. The bank is 250 generated problems
+# whose derivatives are checked against finite differences; if that ever stops
+# agreeing, the wrong answers should not reach a class.
+name: Deploy teaching apps
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "teaching_apps/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run the derivative_practice suite
+        working-directory: teaching_apps/derivative_practice
+        run: node tests.js
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: teaching_apps
+      - id: deployment
+        uses: actions/deploy-pages@v4

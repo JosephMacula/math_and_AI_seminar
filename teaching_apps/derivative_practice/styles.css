@@ -1,0 +1,257 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f7f7f5;
+  --card: #ffffff;
+  --ink: #1b1b1a;
+  --muted: #6b6b66;
+  --line: #d9d9d4;
+  --accent: #2f6f5e;
+  --accent-soft: #e3efeb;
+  --grid: #ececea;
+  --axis: #b4b4ae;
+  --curve: #2f6f5e;
+  --student: #c2622a;
+  --answer: #7a4fb0;
+  --right: #2f6f5e;
+  --wrong: #b03a34;
+  --right-soft: #e3efeb;
+  --wrong-soft: #f6e5e4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17181a;
+    --card: #202225;
+    --ink: #ececeb;
+    --muted: #9b9b96;
+    --line: #34363a;
+    --accent: #6fbfa6;
+    --accent-soft: #24352f;
+    --grid: #2a2c30;
+    --axis: #55585d;
+    --curve: #6fbfa6;
+    --student: #e0925a;
+    --answer: #b08ad8;
+    --right: #6fbfa6;
+    --wrong: #e0837c;
+    --right-soft: #22332d;
+    --wrong-soft: #352523;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 1.5rem 3rem;
+  background: var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+main { max-width: 1180px; margin: 0 auto; }
+
+.hero { padding: 2.5rem 0 1.5rem; }
+.eyebrow {
+  margin: 0 0 .35rem;
+  font-size: .74rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+h1 { margin: 0 0 .5rem; font-size: 1.9rem; letter-spacing: -.02em; }
+h2 { margin: 0; font-size: 1.05rem; }
+.lede { margin: 0; max-width: 46rem; color: var(--muted); }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1.15rem 1.25rem;
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: 1.1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .panels { grid-template-columns: minmax(0, 1fr); }
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: .85rem;
+  margin-bottom: .95rem;
+  border-bottom: 1px solid var(--line);
+}
+.counter { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.problem-panel { display: flex; flex-direction: column; }
+
+.statement {
+  margin: .2rem 0 0;
+  font-size: 1.15rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: .15rem 0;
+}
+.statement.point { margin-top: .5rem; color: var(--muted); font-size: 1rem; }
+
+#answer-form { margin-top: 1.4rem; }
+label {
+  display: block;
+  font-size: .84rem;
+  color: var(--muted);
+  margin-bottom: .4rem;
+}
+.entry { display: flex; gap: .5rem; }
+input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 1rem;
+  padding: .5rem .65rem;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  border-color: transparent;
+}
+
+button {
+  font: inherit;
+  font-size: .9rem;
+  padding: .5rem .95rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: var(--card);
+  cursor: pointer;
+}
+button:hover { filter: brightness(1.08); }
+button.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+button.ghost:hover { background: var(--accent-soft); }
+
+/* "Previous" is disabled on the first problem, since a random order has
+   nothing behind it yet.  It must not light up under the cursor. */
+button:disabled { opacity: .4; cursor: default; }
+button:disabled:hover { filter: none; }
+button.ghost:disabled:hover { background: transparent; }
+
+.hint { margin: .55rem 0 0; font-size: .8rem; color: var(--muted); }
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .95em;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0 .28em;
+}
+
+.feedback {
+  margin-top: 1rem;
+  padding: .7rem .85rem;
+  border-radius: 8px;
+  font-size: .92rem;
+  border: 1px solid transparent;
+}
+.feedback.right { background: var(--right-soft); border-color: var(--right); color: var(--right); }
+.feedback.wrong { background: var(--wrong-soft); border-color: var(--wrong); color: var(--wrong); }
+.feedback.note { background: var(--bg); border-color: var(--line); color: var(--muted); }
+
+.answer-reveal {
+  margin-top: .85rem;
+  padding: .75rem .85rem;
+  border: 1px dashed var(--answer);
+  border-radius: 8px;
+  overflow-x: auto;
+}
+.answer-reveal .label {
+  font-size: .74rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: .35rem;
+}
+
+.actions {
+  display: flex;
+  gap: .5rem;
+  margin-top: auto;
+  padding-top: 1.4rem;
+}
+.actions #show { margin-left: auto; }
+
+canvas {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 62vh;
+}
+
+.zoom {
+  display: flex;
+  align-items: center;
+  gap: .7rem;
+  margin-top: .9rem;
+}
+.zoom label {
+  font-size: .72rem;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+}
+.zoom input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+.zoom #zoom-readout { min-width: 4.2rem; text-align: right; }
+
+button.small {
+  padding: .3rem .6rem;
+  font-size: .78rem;
+}
+
+.zoom-note #zoom-window {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.1rem;
+  margin: .85rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: .82rem;
+  color: var(--muted);
+}
+.legend li { display: flex; align-items: center; gap: .45rem; }
+.swatch { width: 20px; height: 3px; border-radius: 2px; display: inline-block; }
+.swatch.curve { background: var(--curve); }
+.swatch.student { background: var(--student); }
+.swatch.answer {
+  background: repeating-linear-gradient(90deg, var(--answer) 0 5px, transparent 5px 9px);
+}
+
+.katex { font-size: 1.05em; }
