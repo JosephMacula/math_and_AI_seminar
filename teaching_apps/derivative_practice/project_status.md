@@ -326,17 +326,30 @@ site root became the app itself, since nothing would have linked to it.
 If a stored derivative ever stops agreeing with its finite difference, the
 wrong answer does not reach a class. The test job passes in CI.
 
-**Blocked on one manual step, which is not something a token can do.** Creating
-a Pages site for the first time requires admin rights that neither available
-token has: the workflow's `GITHUB_TOKEN` is granted `pages: write` but not
-admin, and the Codespace token is refused the same call. Two deploys failed at
-`actions/configure-pages` — first with "Get Pages site failed", then, after
-adding `enablement: true`, with "Create Pages site failed: Resource not
-accessible by integration". The remedy is one switch in
-**Settings - Pages - Build and deployment - Source: GitHub Actions**, after
-which the workflow needs only to be re-run. `enablement: true` was left in
-place: once the site exists the action finds it and never attempts to create
-it, so the workflow stays correct for a repository that already has Pages on.
+**Enabling Pages needed a human, and so did switching it.** Creating a Pages
+site requires admin rights that neither available token has: the workflow's
+`GITHUB_TOKEN` is granted `pages: write` but not admin, and the Codespace token
+is refused create, update *and* `workflow_dispatch` alike — every one comes
+back "Resource not accessible by integration". Two deploys failed at
+`actions/configure-pages` before this was understood, the second even with
+`enablement: true`. `enablement: true` was left in place: once the site exists
+the action finds it rather than trying to create it, so the workflow stays
+correct for a repository that already has Pages on.
+
+**Two deployment mechanisms then raced each other**, which is worth recording
+because the symptom was baffling and the cause was not visible from the site.
+Pages was first switched on as *Deploy from a branch*, which serves the whole
+repository and can only be aimed at the repo root or `/docs` — never at a
+subdirectory, which is the reason that option cannot do what was wanted. That
+setting leaves the classic Jekyll build running *as well as* the workflow. Both
+published, ten seconds apart, and the branch build won: the workflow's deploy
+step reported success while the site showed a Jekyll homepage generated from
+the repository's top-level `README.md`. Setting **Source: GitHub Actions** is
+what resolves it — not merely by enabling the workflow but by switching the
+branch build off, so nothing overwrites the deployment.
+
+**Live at <https://josephmacula.github.io/math_and_AI_seminar/>.** The app is
+the site: `index.html` at the root, `vendor/katex/` beside it.
 
 ---
 
