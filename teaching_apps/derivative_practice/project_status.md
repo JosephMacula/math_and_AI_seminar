@@ -568,6 +568,18 @@ toggle, dragging and a new *Panning* section, and this file carries the
 history. The division is recorded in the Overview at the top, so the next
 session sees it as soon as it starts.
 
+### 2026-09-21 — the "Calculus" eyebrow commented out
+
+The small `Calculus` label that sat above the hero heading is no longer shown.
+In `index.html`, `<p class="eyebrow">Calculus</p>` was commented out rather
+than deleted, so it can be restored by uncommenting the one line; the
+`.eyebrow` rule in `styles.css` was left in place, unused.
+
+This entry catches the log up: the change (commit `c433c02`) was made in a
+session that did not record it here. `README.md` never described the eyebrow,
+so it needed no change. `node tests.js` still passes — the eyebrow was never
+under test, being presentational only.
+
 ---
 
 ## Next steps
