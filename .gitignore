@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 teaching_apps/derivative_practice/tools/verified.json
 .ipynb_checkpoints/
+llm_project/notebooks/input.txt
