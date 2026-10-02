@@ -33,8 +33,8 @@ AI help is limited to syntax and error messages; the core implementations
 
 | Step | Deliverable                                   | Notebook | Status      |
 |------|-----------------------------------------------|----------|-------------|
-| 1    | Character bigram model from counts            |          | not started |
-| 2    | Hand-wired ReLU classifier; trained bigram    |          | not started |
+| 1    | Character bigram model from counts            | [llm_proj_step1.ipynb](notebooks/llm_proj_step1.ipynb) | not started |
+| 2    | Hand-wired ReLU classifier; trained bigram    | [llm_proj_step2.ipynb](notebooks/llm_proj_step2.ipynb) | not started |
 | 3    | Scalar autodiff engine; n-gram MLP            |          | not started |
 | 4    | Causal self-attention head                    |          | not started |
 | 5    | Full GPT architecture                         |          | not started |
