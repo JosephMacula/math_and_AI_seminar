@@ -8,7 +8,9 @@ per step.
 ## Layout
 
     notebooks/   the Colab notebooks, one per step (step1_bigram.ipynb, ...)
-    notes/       hand derivations, scratch notes, capstone planning
+
+Lecture notes are read directly from the course site:
+https://katestange.net/ai/course/llm-course/
 
 ## Moving notebooks between Colab and this repo
 
