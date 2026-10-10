@@ -4,3 +4,6 @@ __pycache__/
 teaching_apps/derivative_practice/tools/verified.json
 .ipynb_checkpoints/
 llm_project/notebooks/input.txt
+llm_project/notebooks/tensor_basics.ipynb
+llm_project/notebooks/tensor_basics_solutions.ipynb
+teaching_apps/manim_riemann_sums/media/
