@@ -8,9 +8,10 @@ class CalcOne(Scene):
             tips = False,
             axis_config={"include_numbers":True}
             )
-        graph = ax.plot(lambda x: np.sin(x), x_range=[0,PI], color=BLUE)
+        graph = ax.plot(lambda x: np.sin(x), x_range=[0,PI], color=RED, stroke_width=6)
+        graph.set_z_index(1)  # always draw the curve above rectangles and area
         self.play(Create(ax), Create(graph))
-        self.wait(4)  
+        self.wait(1)  
 
             
         def _riemann_sum(num_rects):
@@ -26,11 +27,17 @@ class CalcOne(Scene):
             
         
         n_values = [5,10,25,50,100]
-        for i in range(len(n_values)-1):
-            self.play(ReplacementTransform(_riemann_sum(n_values[i]),_riemann_sum(n_values[i+1])))
+        rects = _riemann_sum(n_values[0])
+        self.play(Create(rects))
+        self.wait(.5)
+        for n in n_values[1:]:
+            new_rects = _riemann_sum(n)
+            self.play(ReplacementTransform(rects, new_rects))
+            rects = new_rects
             self.wait(.5)
 
-
+        area = ax.get_area(graph, x_range=[0, PI], opacity=1, color = GREEN)
+        self.play(FadeIn(area))
         
 
 
