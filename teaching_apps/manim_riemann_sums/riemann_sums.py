@@ -55,5 +55,5 @@ class RiemannSumAnimation(Scene):
             rects = new_rects
             self.wait(.5)
 
-        area = ax.get_area(graph, x_range=[self.a, self.b], opacity=1, color = GREEN)
-        self.play(FadeIn(area))
+        # area = ax.get_area(graph, x_range=[self.a, self.b], opacity=1, color = GREEN)
+        # self.play(FadeIn(area))
